@@ -1,12 +1,31 @@
 {
   "pages":[
     "pages/index/index",
-    "pages/logs/logs"
+    "pages/logs/logs",
+    "pages/gobang/gobang"
   ],
+  "tabBar": {
+    "color": "#606b72",
+    "selectedColor": "#22ba66",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "position":"top",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "数独"
+      },
+      {
+        "pagePath": "pages/gobang/gobang",
+        "text": "五子棋"
+      }
+    ]
+  },
   "window":{
     "backgroundTextStyle":"light",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "WeChat",
     "navigationBarTextStyle":"black"
-  }
+  },
+   "debug": true
 }

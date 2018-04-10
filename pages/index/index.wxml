@@ -3,11 +3,23 @@
   <view class="userinfo">
     <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
     <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" background-size="cover"></image>
-      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+        <view class="top-row">
+            <view class="use-time">{{ useTime }}</view>
+            <view class="user-infor">
+                <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+                <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" background-size="cover"></image>
+            </view>
+        </view>
+        <view class="gobang-cont">
+            <view  wx:for="{{ arr}}" wx:for-index="idex" wx:for-item="item" class="item {{'item-'+(idex+1)}} display-grid">
+                <view wx:for="{{ item }}" wx:for-index="idx" wx:for-item="itemValue" class="child {{itemValue.bgclass}}"  data-self-index="{{ idx }}" data-father-index="{{idex}}" data-value="{{ itemValue.valu }}" style="grid-column: {{ idx%3 +1}};" bindtap="chooseToChange">
+                    {{itemValue.valu > 0 ? itemValue.valu : ''}}
+                </view>
+            </view>
+        </view>
+        <view class="key-board">
+            <a class="num-key" wx:for="{{[1,2,3,4,5,6,7,8,9]}}" data-value="{{item}}" bindtap="writeNum">{{item}}</a>
+        </view>
     </block>
-  </view>
-  <view class="usermotto">
-    <text class="user-motto">{{motto}}</text>
   </view>
 </view>
