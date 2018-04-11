@@ -12,7 +12,7 @@
         </view>
         <view class="gobang-cont">
             <view  wx:for="{{ arr}}" wx:for-index="idex" wx:for-item="item" class="item {{'item-'+(idex+1)}} display-grid">
-                <view wx:for="{{ item }}" wx:for-index="idx" wx:for-item="itemValue" class="child {{itemValue.bgclass}}"  data-self-index="{{ idx }}" data-father-index="{{idex}}" data-value="{{ itemValue.valu }}" style="grid-column: {{ idx%3 +1}};" bindtap="chooseToChange">
+                <view wx:for="{{ item }}" wx:for-index="idx" wx:for-item="itemValue" class="child {{itemValue.bgclass}}"  data-self-index="{{ idx }}" data-father-index="{{idex}}" data-disabled="{{ itemValue.disabledChange }}" data-value="{{ itemValue.valu }}" style="grid-column: {{ idx%3 +1}};" bindtap="chooseToChange">
                     {{itemValue.valu > 0 ? itemValue.valu : ''}}
                 </view>
             </view>
