@@ -381,61 +381,90 @@ Page({
     var childs = 0,
     sourFatherArr = [],
     rowArray = [],
-    columArray = [];
+    columArray = [],
+    cacheRowArray = [],
+    cacheColArray = [],
+    cacheFatherArr = [];
     while( childs < 9 ){
           var sour = [1,2,3,4,5,6,7,8,9],
               sourChildArr = [];
-          var loopTimes = 3;//随机空缺个数
-          sour.sort(function(){
-              return Math.random() > 0.5
-          });
+          var loopTimes = 3,//随机空缺个数
+              isFlowStack = false,tempData,tempInd;
+          for(let j=0;j<sour.length-1;j++){
+                tempInd = Math.floor(Math.random()*(sour.length-j));
+                tempData = sour[tempInd];
+                sour[tempInd] = sour[sour.length-j-1];
+                sour[sour.length-j-1] = tempData;
+          }
+          cacheRowArray = this.deepCopy(rowArray);    //每个小方格循环添加完就缓存下来，下一方格如果中间冲突后可以回退上一快照
+          cacheColArray = this.deepCopy(columArray);
+          // cacheFatherArr = sourFatherArr;
           // while(loopTimes > 0){
           //     var randomIndex = Math.floor(Math.random()*9);
           //     sour[randomIndex] = 0;
           //     loopTimes--;
           // }
           for(let i =0; i < sour.length; i++){
-                if( rowArray[ Math.floor(i/3) + Math.floor(childs/3)*3] ){
-                        var rowResult = this.checkHasRepeat(rowArray,columArray,i,childs,sour);
-                        // var rowResult = this.checkHasRepeat(rowArray[ Math.floor(i/3) + Math.floor(childs/3)*3 ],sour,i);
-                        sour = rowResult.sour;
-                        rowArray  = rowResult.rowArray;
-                        columArray = rowResult.columArray
-                }else{
-                    rowArray[ Math.floor(i/3) + Math.floor(childs/3)*3 ] = [sour[i]];
-                    if( columArray[ i%3 + childs%3*3 ] ){
-                        columArray[ i%3 + childs%3*3 ].push(sour[i]);
-                    }else{
-                         columArray[ i%3 + childs%3*3 ] = [sour[i]];
-                    }
+                var rowResult = this.checkHasRepeat(rowArray,columArray,i,childs,sour,0);
+                if(rowResult === 'reset'){
+                    rowArray  = this.deepCopy(cacheRowArray);
+                    columArray = this.deepCopy(cacheColArray);
+                    isFlowStack = true;
+                    break;
+                }else if(rowResult instanceof Object){
+                    sour = rowResult.sour;
+                    rowArray  = rowResult.rowArray;
+                    columArray = rowResult.columArray;
                 }
+                
                 var sourObj = {}
                 sourObj.valu = sour[i];
                 sourObj.bgclass = '';
                 sourObj.disabledChange = sour[i] != 0;
                 sourChildArr.push(sourObj);
           }
-         sourFatherArr.push(sourChildArr); 
-         childs++;
+          if(!isFlowStack){
+             sourFatherArr.push(sourChildArr); 
+             childs++;
+          }
     }
      this.setData({
         arr:sourFatherArr
      })
 
   },
-  checkHasRepeat: function(rowArray,columArray,index,childs,sour){
+  deepCopy:function(obj){
+        var result = obj,that = this;
+
+        if(obj instanceof Array){
+            result = [];
+            obj.forEach(function(item,index){
+                result.push(that.deepCopy(item));
+            });
+        }else if(obj instanceof Object){
+            result = {};
+            for(var prop in obj){
+                result[prop] = that.deepCopy(obj);
+            }
+        }
+        return result;
+  },
+  checkHasRepeat: function(rowArray,columArray,index,childs,sour,nowReplaceTimes){
         var flag = false,
             rowInsert = rowArray[ Math.floor(index/3) + Math.floor(childs/3)*3 ],
             colInsert = columArray[ index%3 + childs%3*3 ];
 
-        var temp;
-        for(let i = 0;i<rowInsert.length;i++){
-            if(rowInsert[i] == sour[index]){
-                flag = true;
-                break;
+        var temp,replaceMaxTimes = 9-index;
+        if(rowInsert instanceof Array){
+            for(let i = 0;i<rowInsert.length;i++){
+                if(rowInsert[i] == sour[index]){
+                    flag = true;
+                    break;
+                }
             }
         }
-        if( colInsert instanceof Array ){
+
+        if( colInsert instanceof Array && !flag){
             for(let j = 0;j<colInsert.length;j++){
                 if(colInsert[j] ==  sour[index]){
                     flag = true;
@@ -447,13 +476,18 @@ Page({
             temp = sour[index];
             sour.splice(index,1);
             sour.push(temp);
-           return this.checkHasRepeat(rowArray,columArray,index,childs,sour);
+            nowReplaceTimes++;
+           return replaceMaxTimes > nowReplaceTimes ? this.checkHasRepeat(rowArray,columArray,index,childs,sour,nowReplaceTimes) : 'reset';
         }else{
-            rowInsert.push(sour[index]);
+            if(rowInsert instanceof Array){
+                rowInsert.push(sour[index]);
+            }else{
+                rowArray.push([sour[index]]);
+            }
             if( colInsert instanceof Array ){
                 colInsert.push(sour[index]);
             }else{
-                colInsert = [sour[index]];
+                columArray.push([sour[index]]);
             }
             console.log(rowArray);
             console.log(columArray);
